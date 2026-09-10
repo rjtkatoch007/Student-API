@@ -1,5 +1,6 @@
 const express = require('express');
-const mysql = require('mysql2')
+const db = require('mysql2')
+const studentRoutes = require("./routes/studentRoute");
 const app = express();
 const port = 3000;
 
@@ -8,7 +9,7 @@ app.get('/', (req, res)=>{
 });
 
 app.use(express.json());
-
+app.use('/students', studentRoutes);
 
 
 app.listen(port, ()=>{
