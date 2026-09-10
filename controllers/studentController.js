@@ -1,6 +1,75 @@
 const db = require("../utils/db");
+const Student = require('../models/students');
 
-const allStudents = (req,res)=>{
+const allStudents = async (req,res)=>{
+    try {
+        const students = await Student.findAll();
+        if(!students){
+            res.status(404).send("Students not found");
+        }        
+        console.log(students.every(stud => stud instanceof Student)); // true
+        console.log('All students:', JSON.stringify(students, null, 2));
+        res.status(200).send(students); 
+        
+    } catch (error) {
+         res.status(500).send("Unable to make entry.");
+    }
+}
+
+const addStudent = async (req, res) => {
+    try {
+        const {email, name}=req.body;
+        const student = await Student.create({
+            email:email,
+            name:name
+        });
+        res.status(201).send(`User with name: ${name} is created!`);
+    } catch (error) {
+        res.status(500).send("Unable to make entry.");
+    }
+}
+
+const updateStudent=async (req, res)=>{
+    try {
+        const {id}=req.params;
+        const {name, email}=req.body;
+
+        const student = await Student.findByPk(id);
+        if(!student){
+            res.status(404).send("Student is not found");
+        }
+        student.name = name;
+        student.email = email;
+        await student.save();
+        res.status(200).send("User has been updated!");        
+    } catch (error) {
+        res.status(500).send("Student cannot be updated");
+    }
+}
+
+const deleteStudent = async (req, res) => {
+    try {
+        const {id} = req.params;
+        const student = await Student.destroy({
+            where:{
+                id:id
+            }
+        });
+
+        if(!student){
+            res.status(404).send("Student not found");
+        }
+        res.status(200).send("Student deleted");
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error encountered while deleting");
+    }
+    
+}
+
+
+/* const allStudents = (req,res)=>{
     const selectQ = `SELECT * FROM students`;
     db.execute(selectQ, [], (err, result)=>{
         if(err){
@@ -76,7 +145,7 @@ const deleteStudent = (req, res) => {
         res.status(200).send(`Student with id ${id} successfully deleted`);
     })
 }
-
+ */
 module.exports = {
     allStudents,
     addStudent,
